@@ -9,12 +9,15 @@ namespace TaskManager.API.AddControllers
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public TasksController(AppDbContext context)
+        private readonly TaskManagerDbContext _context;
+        public TasksController(TaskManagerDbContext context)
         {
             _context = context;
         }
 
+        ///<summary>
+        ///Returns a list of all tasks.
+        ///</summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTasks()
         {
