@@ -38,7 +38,7 @@ namespace TaskManager.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(CreateTaskDto dto)
+        public async Task<ActionResult<TaskItem>> Create(CreateTaskDto dto)
         {
             var task = new TaskItem
             {
@@ -50,9 +50,42 @@ namespace TaskManager.API.Controllers
             ;
 
             _context.Tasks.Add(task);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Update(int id, UpdateTaskDto dto)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+
+            if (task == null)
+            {
+                return NotFound($"Task with id:{id} not found");
+            }
+
+            task.Title = dto.Title;
+            task.Description = dto.Description;
+            task.IsComplete = dto.IsComplete;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+
+            if (task == null)
+            {
+                return NotFound($"Task with id: {id} not found");
+            }
+            _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
