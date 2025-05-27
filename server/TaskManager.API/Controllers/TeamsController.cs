@@ -115,6 +115,11 @@ namespace TaskManager.API.Controllers
                 return NotFound($"Team with id: {id} not found");
             }
 
+            var nameExists = await _context.Teams.AnyAsync(t => t.Name == dto.Name && t.Id != id);
+            if (nameExists)
+            {
+                return BadRequest($"Team with name {dto.Name} already exists");
+            }
             team.Name = dto.Name;
             team.Description = dto.Description;
 
