@@ -3,6 +3,8 @@ using Microsoft.OpenApi.Models;
 using TaskManager.API.Data;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using TaskManager.API.Repositories.Interfaces;
+using TaskManager.API.Repositories.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,11 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<TaskManagerDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register repositories
+
+builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
 var app = builder.Build();
 

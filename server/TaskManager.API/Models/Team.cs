@@ -11,7 +11,8 @@ namespace TaskManager.API.Models
         [MaxLength(250)]
         public string? Description { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
+        // public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
+        public ICollection<Project> Projects { get; set; } = new List<Project>();
 
     }
 }

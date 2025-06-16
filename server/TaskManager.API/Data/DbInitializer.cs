@@ -26,6 +26,27 @@ namespace TaskManager.API.Data
             context.Teams.AddRange(teams);
             context.SaveChanges();
 
+            var projects = new List<Project>
+            {
+                new Project
+                {
+                    Name = "Website Redesign",
+                    Description = "Complete redesign of the company website",
+                    TeamId = teams[0].Id,
+                    CreatedAt = DateTime.UtcNow
+                },
+
+                new Project
+                {
+                    Name = "Marketing Campaign Q1",
+                    Description = "First quarter marketing campaign",
+                    TeamId = teams[1].Id,
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+            context.Projects.AddRange(projects);
+            context.SaveChanges();
+
             var tasks = new List<TaskItem>
             {
                 new TaskItem
@@ -34,7 +55,7 @@ namespace TaskManager.API.Data
                     Description = "This task was seeded",
                     IsComplete = false,
                     CreatedAt = DateTime.UtcNow,
-                    TeamId = teams[0].Id
+                    ProjectId = projects[0].Id
                 },
                 new TaskItem
                 {
@@ -42,7 +63,31 @@ namespace TaskManager.API.Data
                     Description = "This task was seeded",
                     IsComplete = true,
                     CreatedAt = DateTime.UtcNow,
-                    TeamId = teams[1].Id
+                    ProjectId = projects[0].Id
+                },
+                new TaskItem
+                {
+                    Title = "Seeded task 3",
+                    Description = "This task was seeded",
+                    IsComplete = true,
+                    CreatedAt = DateTime.UtcNow,
+                    ProjectId = projects[0].Id
+                },
+                new TaskItem
+                {
+                    Title = "Seeded task 4",
+                    Description = "This task was seeded",
+                    IsComplete = true,
+                    CreatedAt = DateTime.UtcNow,
+                    ProjectId = projects[1].Id
+                },
+                new TaskItem
+                {
+                    Title = "Seeded task 5",
+                    Description = "This task was seeded",
+                    IsComplete = false,
+                    CreatedAt = DateTime.UtcNow,
+                    ProjectId = projects[1].Id
                 }
             };
 

@@ -22,20 +22,22 @@ namespace TaskManager.API.Controllers
         {
 
             var teams = await _context.Teams
-                .Include(t => t.Tasks)
+                .Include(t => t.Projects)
                 .Select(t => new TeamResponseDto
                 {
                     Id = t.Id,
                     Name = t.Name,
                     Description = t.Description,
                     CreatedAt = t.CreatedAt,
-                    Tasks = t.Tasks.Select(task => new TaskSummaryDto
+                    Projects = t.Projects.Select(project => new ProjectSummaryDto
                     {
-                        Id = task.Id,
-                        Title = task.Title,
-                        Description = task.Description,
-                        IsComplete = task.IsComplete,
-                        CreatedAt = task.CreatedAt
+                        Id = project.Id,
+                        Name = project.Name,
+                        Description = project.Description,
+                        IsComplete = project.IsComplete,
+                        CreatedAt = project.CreatedAt,
+                        TaskCount = project.Tasks.Count(),
+                        CompletedTaskCount = project.Tasks.Count(tasks => tasks.IsComplete)
 
                     }).ToList()
                 })
@@ -48,7 +50,7 @@ namespace TaskManager.API.Controllers
         public async Task<ActionResult<TeamResponseDto>> GetTeam(int id)
         {
             var team = await _context.Teams
-            .Include(t => t.Tasks)
+            .Include(t => t.Projects)
             .Where(t => t.Id == id)
             .Select(t => new TeamResponseDto
             {
@@ -56,13 +58,16 @@ namespace TaskManager.API.Controllers
                 Name = t.Name,
                 Description = t.Description,
                 CreatedAt = t.CreatedAt,
-                Tasks = t.Tasks.Select(task => new TaskSummaryDto
+                Projects = t.Projects.Select(project => new ProjectSummaryDto
                 {
-                    Id = task.Id,
-                    Title = task.Title,
-                    Description = task.Description,
-                    IsComplete = task.IsComplete,
-                    CreatedAt = task.CreatedAt
+                    Id = project.Id,
+                    Name = project.Name,
+                    Description = project.Description,
+                    IsComplete = project.IsComplete,
+                    CreatedAt = project.CreatedAt,
+                    TaskCount = project.Tasks.Count(),
+                    CompletedTaskCount = project.Tasks.Count(t => t.IsComplete)
+
                 }).ToList()
             }).FirstOrDefaultAsync();
 
@@ -100,7 +105,7 @@ namespace TaskManager.API.Controllers
                 Name = team.Name,
                 Description = team.Description,
                 CreatedAt = team.CreatedAt,
-                Tasks = new List<TaskSummaryDto>()
+                Projects = new List<ProjectSummaryDto>()
             };
 
             return CreatedAtAction(nameof(GetTeam), new { id = team.Id }, responseDto);

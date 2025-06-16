@@ -4,6 +4,6 @@ namespace TaskManager.API.DTOs
     {
         public required string Title { get; set; }
         public required string Description { get; set; }
-        public int TeamId { get; set; }
+        public int ProjectId { get; set; }
     }
 }

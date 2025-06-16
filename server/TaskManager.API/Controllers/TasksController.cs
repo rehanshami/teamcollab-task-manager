@@ -23,7 +23,7 @@ namespace TaskManager.API.Controllers
         public async Task<ActionResult<IEnumerable<TaskResponseDto>>> GetTasks()
         {
             var tasks = await _context.Tasks
-                .Include(t => t.Team)
+                .Include(t => t.Project)
                 .Select(t => new TaskResponseDto
                 {
                     Id = t.Id,
@@ -31,12 +31,17 @@ namespace TaskManager.API.Controllers
                     Description = t.Description,
                     IsComplete = t.IsComplete,
                     CreatedAt = t.CreatedAt,
-                    TeamId = t.TeamId,
-                    Team = t.Team != null ? new TeamSummaryDto
+                    ProjectId = t.ProjectId,
+                    Project = t.Project != null ? new ProjectSummaryDto
                     {
-                        Id = t.Team.Id,
-                        Name = t.Team.Name,
-                        Description = t.Team.Description
+                        Id = t.Project.Id,
+                        Name = t.Project.Name,
+                        Description = t.Project.Description,
+                        CreatedAt = t.CreatedAt,
+                        DueDate = t.Project.DueDate,
+                        IsComplete = t.Project.IsComplete,
+                        TaskCount = t.Project.Tasks.Count(),
+                        CompletedTaskCount = t.Project.Tasks.Count(task => task.IsComplete == true)
                     } : null
                 }).ToListAsync();
             return Ok(tasks);
@@ -46,7 +51,7 @@ namespace TaskManager.API.Controllers
         public async Task<ActionResult<TaskResponseDto>> GetTask(int id)
         {
             var task = await _context.Tasks
-                .Include(t => t.Team)
+                .Include(t => t.Project)
                 .Where(t => t.Id == id)
                 .Select(t => new TaskResponseDto
                 {
@@ -55,12 +60,17 @@ namespace TaskManager.API.Controllers
                     Description = t.Description,
                     IsComplete = t.IsComplete,
                     CreatedAt = t.CreatedAt,
-                    TeamId = t.TeamId,
-                    Team = t.Team != null ? new TeamSummaryDto
+                    ProjectId = t.ProjectId,
+                    Project = t.Project != null ? new ProjectSummaryDto
                     {
-                        Id = t.Team.Id,
-                        Name = t.Team.Name,
-                        Description = t.Team.Description
+                        Id = t.Project.Id,
+                        Name = t.Project.Name,
+                        Description = t.Project.Description,
+                        CreatedAt = t.Project.CreatedAt,
+                        DueDate = t.Project.DueDate,
+                        IsComplete = t.Project.IsComplete,
+                        TaskCount = t.Project.Tasks.Count(),
+                        CompletedTaskCount = t.Project.Tasks.Count(task => task.IsComplete)
                     } : null
                 }).FirstOrDefaultAsync();
 
@@ -74,17 +84,27 @@ namespace TaskManager.API.Controllers
         [HttpPost]
         public async Task<ActionResult<TaskResponseDto>> Create(CreateTaskDto dto)
         {
-            var teamExists = await _context.Teams.AnyAsync(t => t.Id == dto.TeamId);
-            if (!teamExists)
+            // Validate project exists or not
+            var project = await _context.Projects.FindAsync(dto.ProjectId);
+            if (project == null)
             {
-                return BadRequest($"Team with id:{dto.TeamId} not found");
+                return NotFound($"Project with id: {dto.ProjectId} not found");
             }
+
+            // Validate if task with same name exists already in the project
+            var taskExists = await _context.Tasks.AnyAsync(t => t.Title == dto.Title && t.ProjectId == dto.ProjectId);
+            if (taskExists)
+            {
+                return BadRequest($"Task with name: {dto.Title}, already exists in Project Id: {dto.ProjectId}");
+            }
+
 
             var task = new TaskItem
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                TeamId = dto.TeamId,
+                // TeamId = dto.TeamId,
+                ProjectId = dto.ProjectId,
                 IsComplete = false,
                 CreatedAt = DateTime.UtcNow
             }
@@ -93,7 +113,6 @@ namespace TaskManager.API.Controllers
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
 
-            var team = await _context.Teams.FindAsync(dto.TeamId);
             var responseDto = new TaskResponseDto
             {
                 Id = task.Id,
@@ -101,12 +120,13 @@ namespace TaskManager.API.Controllers
                 Description = task.Description,
                 IsComplete = task.IsComplete,
                 CreatedAt = task.CreatedAt,
-                TeamId = task.TeamId,
-                Team = new TeamSummaryDto
+                // TeamId = task.TeamId,
+                ProjectId = task.ProjectId,
+                Project = new ProjectSummaryDto
                 {
-                    Id = team.Id,
-                    Name = team.Name,
-                    Description = team.Description
+                    Id = project.Id,
+                    Name = project.Name,
+                    Description = project.Description
                 }
             };
 
