@@ -40,6 +40,7 @@ namespace TaskManager.API.Repositories.Implementations
         {
             return await _dbSet
                 .Include(t => t.Project)
+                .ThenInclude(p => p.Tasks)
                 .FirstOrDefaultAsync(t => t.Id == taskId);
         }
     }

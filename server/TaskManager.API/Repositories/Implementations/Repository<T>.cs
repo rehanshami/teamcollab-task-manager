@@ -12,7 +12,7 @@ namespace TaskManager.API.Repositories.Implementations
 
         public Repository(TaskManagerDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _dbSet = context.Set<T>();
         }
 
@@ -28,6 +28,8 @@ namespace TaskManager.API.Repositories.Implementations
 
         public virtual async Task<T> AddAsync(T entity)
         {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
             await _dbSet.AddAsync(entity);
             return entity;
         }
